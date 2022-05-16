@@ -1,36 +1,38 @@
 import { Request, Response } from "express";
-import { deletePost, improvePosts, Posts } from "../db";
+import {newPostsCollection} from "../db";
 
-export const getAllPosts = (req: Request, res: Response) => {
-    res.send(Posts)
+export const getAllPosts = async (req: Request, res: Response) => {
+    const posts = await newPostsCollection.find({}).toArray();
+    res.send(posts)
 }
 
-export const getPost = (req: Request, res: Response) => {
-    const id = req.params.id
-    const post = Posts.find(post => post.id === Number(id))
+export const getPost = async (req: Request, res: Response) => {
+    const title = req.params.title
+    const post = await newPostsCollection.find({"title": {$regex: title}}).toArray()
     res.send(post)
 }
 
-export const setNewPost = (req: Request, res: Response) => {
+export const setNewPost = async (req: Request, res: Response) => {
     const newPost = {
         id: +(new Date()),
         title: req.body.title,
         plot: req.body.plot,
     }
-    Posts.push(newPost)
+    const postResult = await newPostsCollection.insertOne(newPost)
     res.send(200)
 }
 
-export const deleteFromDbPost = (req: Request, res: Response) => {
-    const id = req.params.id
-    deletePost(Number(id))
-    const arrayWithoutChosenPost = Posts.filter(post => post.id !== Number(id))
-    res.send(arrayWithoutChosenPost)
+export const deleteFromDbPost = async (req: Request, res: Response) => {
+    const title = req.params.title
+    const deleteResult = await newPostsCollection.deleteOne({"title": {$regex: title}})
+    res.send(200)
 }
 
-export const changePosts = (req: Request, res: Response) => {
-    const id = req.body.id
-    const name = req.body.name
-    const result = improvePosts(Number(id), name)
-    res.send(result)
+export const changePosts = async (req: Request, res: Response) => {
+    const title = req.body.title
+    const newTitle = req.body.newTitle
+    debugger
+    const patchResult = await newPostsCollection.updateOne({"title": {$regex: title}}, {$set: {title: newTitle}})
+    debugger
+    res.send(200)
 }

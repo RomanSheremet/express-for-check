@@ -1,4 +1,6 @@
 // Блоггеры
+import {MongoClient} from "mongodb";
+
 export let Bloggers = [
     {id: 1, name: 'Blogger A'},
     {id: 2, name: 'Blogger B'},
@@ -17,21 +19,25 @@ export function improveVideos(id: number, name: string) {
     return Bloggers
 }
 
-// Посты
-export let Posts = [
-    {id: 1, title: 'Post A', plot: 'First plot'},
-    {id: 2, title: 'Post B', plot: 'Second plot'},
-    {id: 3, title: 'Post C', plot: 'Third plot'},
-    {id: 4, title: 'Post D', plot: 'Fourth plot'},
-    {id: 5, title: 'Post E', plot: 'Fifth plot'},
-]
+// Соединение с базой данных
 
-export function deletePost(id: number) {
-    Posts = Posts.filter(post => post.id !== id)
-    return Posts
-}
+const mongoUri = process.env.monngoURI || 'mongodb://localhost:27017'
 
-export function improvePosts(id: number, title: string) {
-    Posts = Posts.map(post => ({...post, title: post.id === id ? title : post.title}))
-    return Posts
+const client = new MongoClient(mongoUri)
+
+const postsDb = client.db("posts")
+
+export const newPostsCollection = postsDb.collection("some_new_posts")
+
+export const userCollection = postsDb.collection("users")
+
+export async function runDb() {
+    try {
+        await client.connect()
+        await client.db('posts').command({ping: 1})
+        console.log("connection successful")
+    } catch (e) {
+        await client.close()
+        console.log("connection failed")
+    }
 }

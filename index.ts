@@ -1,19 +1,25 @@
-import express, { Request, Response } from 'express'
+import express from 'express'
 import bodyParser from 'body-parser'
-import router from './src/router';
-const app = express()
+import {runDb} from "./src/db";
+import {connectPostsToRouter} from "./src/Posts/posts-routers";
+import {authorizationRouter} from "./src/Authorization/authorization-routers";
+export const app = express()
 const port = process.env.PORT || 5000
-
-app.use(router)
 
 // create application/json parser
 const jsonParserMiddleware = bodyParser.json()
 app.use(jsonParserMiddleware)
 
-app.get('/', (req: Request, res: Response ) => {
-    res.send('Hello: World!!!!!!!!!!!')
-})
+// соединение роутов с приложением
+connectPostsToRouter()
+authorizationRouter()
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+
+const startApp = async () => {
+    await runDb()
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`)
+    })
+}
+
+startApp()

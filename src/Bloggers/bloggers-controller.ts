@@ -2,6 +2,7 @@ import {Request, Response} from "express";
 import {deleteVideos, improveVideos, Bloggers} from "../db";
 
 export const getAllBloggers = (req: Request, res: Response) => {
+    console.log("bloggers")
     res.send(Bloggers)
 }
 
